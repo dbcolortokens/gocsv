@@ -70,7 +70,7 @@ func writeFromChan(writer CSVWriter, c <-chan interface{}, omitHeaders bool) err
 	return writer.Error()
 }
 
-func writeTo(writer CSVWriter, in interface{}, omitHeaders bool) error {
+func writeTo(writer CSVWriter, in interface{}, omitHeaders bool, options Options) error {
 	inValue, inType := getConcreteReflectValueAndType(in) // Get the concrete type (not pointer) (Slice<?> or Array<?>)
 	if err := ensureInType(inType); err != nil {
 		return err
@@ -82,7 +82,16 @@ func writeTo(writer CSVWriter, in interface{}, omitHeaders bool) error {
 	inInnerStructInfo := getStructInfo(inInnerType) // Get the inner struct info to get CSV annotations
 	csvHeadersLabels := make([]string, len(inInnerStructInfo.Fields))
 	for i, fieldInfo := range inInnerStructInfo.Fields { // Used to write the header (first line) in CSV
-		csvHeadersLabels[i] = fieldInfo.getFirstKey()
+		if options.HeaderMappings != nil {
+			header := fieldInfo.getFirstKey()
+			if val, ok := options.HeaderMappings[header]; ok {
+				csvHeadersLabels[i] = val
+			} else {
+				csvHeadersLabels[i] = fieldInfo.getFirstKey()
+			}
+		} else {
+			csvHeadersLabels[i] = fieldInfo.getFirstKey()
+		}
 	}
 	if !omitHeaders {
 		if err := writer.Write(csvHeadersLabels); err != nil {

@@ -118,14 +118,14 @@ func getCSVReader(in io.Reader) CSVReader {
 // Marshal functions
 
 // MarshalFile saves the interface as CSV in the file.
-func MarshalFile(in interface{}, file *os.File) (err error) {
-	return Marshal(in, file)
+func MarshalFile(in interface{}, file *os.File, options Options) (err error) {
+	return Marshal(in, file, options)
 }
 
 // MarshalString returns the CSV string from the interface.
 func MarshalString(in interface{}) (out string, err error) {
 	bufferString := bytes.NewBufferString(out)
-	if err := Marshal(in, bufferString); err != nil {
+	if err := Marshal(in, bufferString, Options{}); err != nil {
 		return "", err
 	}
 	return bufferString.String(), nil
@@ -134,7 +134,7 @@ func MarshalString(in interface{}) (out string, err error) {
 // MarshalStringWithoutHeaders returns the CSV string from the interface.
 func MarshalStringWithoutHeaders(in interface{}) (out string, err error) {
 	bufferString := bytes.NewBufferString(out)
-	if err := MarshalWithoutHeaders(in, bufferString); err != nil {
+	if err := MarshalWithoutHeaders(in, bufferString, Options{}); err != nil {
 		return "", err
 	}
 	return bufferString.String(), nil
@@ -143,22 +143,22 @@ func MarshalStringWithoutHeaders(in interface{}) (out string, err error) {
 // MarshalBytes returns the CSV bytes from the interface.
 func MarshalBytes(in interface{}) (out []byte, err error) {
 	bufferString := bytes.NewBuffer(out)
-	if err := Marshal(in, bufferString); err != nil {
+	if err := Marshal(in, bufferString, Options{}); err != nil {
 		return nil, err
 	}
 	return bufferString.Bytes(), nil
 }
 
 // Marshal returns the CSV in writer from the interface.
-func Marshal(in interface{}, out io.Writer) (err error) {
+func Marshal(in interface{}, out io.Writer, options Options) (err error) {
 	writer := getCSVWriter(out)
-	return writeTo(writer, in, false)
+	return writeTo(writer, in, false, options)
 }
 
 // MarshalWithoutHeaders returns the CSV in writer from the interface.
-func MarshalWithoutHeaders(in interface{}, out io.Writer) (err error) {
+func MarshalWithoutHeaders(in interface{}, out io.Writer, options Options) (err error) {
 	writer := getCSVWriter(out)
-	return writeTo(writer, in, true)
+	return writeTo(writer, in, true, options)
 }
 
 // MarshalChan returns the CSV read from the channel.
@@ -173,12 +173,12 @@ func MarshalChanWithoutHeaders(c <-chan interface{}, out CSVWriter) error {
 
 // MarshalCSV returns the CSV in writer from the interface.
 func MarshalCSV(in interface{}, out CSVWriter) (err error) {
-	return writeTo(out, in, false)
+	return writeTo(out, in, false, Options{})
 }
 
 // MarshalCSVWithoutHeaders returns the CSV in writer from the interface.
 func MarshalCSVWithoutHeaders(in interface{}, out CSVWriter) (err error) {
-	return writeTo(out, in, true)
+	return writeTo(out, in, true, Options{})
 }
 
 // --------------------------------------------------------------------------
