@@ -218,6 +218,9 @@ func filterTags(tagName string, indexChain []int, field reflect.StructField) (*f
 	currFieldInfo := fieldInfo{IndexChain: indexChain}
 
 	fieldTag := field.Tag.Get(tagName)
+	if fieldTag == "" {
+		fieldTag = field.Tag.Get(JsonTagName)
+	}
 	fieldTags := strings.Split(fieldTag, TagSeparator)
 
 	filteredTags := []string{}

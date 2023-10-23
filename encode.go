@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 )
 
 var (
@@ -82,17 +83,28 @@ func writeTo(writer CSVWriter, in interface{}, omitHeaders bool, options Options
 	inInnerStructInfo := getStructInfo(inInnerType) // Get the inner struct info to get CSV annotations
 	csvHeadersLabels := make([]string, len(inInnerStructInfo.Fields))
 	for i, fieldInfo := range inInnerStructInfo.Fields { // Used to write the header (first line) in CSV
+		isCustomHeaderPresent := false
 		if options.HeaderMappings != nil {
 			header := fieldInfo.getFirstKey()
 			if val, ok := options.HeaderMappings[header]; ok {
 				csvHeadersLabels[i] = val
+				isCustomHeaderPresent = true
 			} else {
-				csvHeadersLabels[i] = fieldInfo.getFirstKey()
+				arrHeaders := strings.Split(header, HeaderSeparator)
+				if len(arrHeaders) > 0 {
+					lastWord := arrHeaders[len(arrHeaders)-1]
+					if val, ok := options.HeaderMappings[lastWord]; ok {
+						csvHeadersLabels[i] = fmt.Sprintf("%s%s", strings.Replace(header, lastWord, "", -1), val)
+						isCustomHeaderPresent = true
+					}
+				}
 			}
-		} else {
+		}
+		if !isCustomHeaderPresent {
 			csvHeadersLabels[i] = fieldInfo.getFirstKey()
 		}
 	}
+
 	if !omitHeaders {
 		if err := writer.Write(csvHeadersLabels); err != nil {
 			return err

@@ -32,9 +32,13 @@ var ShouldAlignDuplicateHeadersWithStructFieldOrder = false
 
 // TagName defines key in the struct field's tag to scan
 var TagName = "csv"
+var JsonTagName = "json"
 
 // TagSeparator defines seperator string for multiple csv tags in struct fields
 var TagSeparator = ","
+
+// To handle custom header mapping
+var HeaderSeparator = "."
 
 // FieldSeperator defines how to combine parent struct with child struct
 var FieldsCombiner = "."
